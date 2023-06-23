@@ -14,13 +14,13 @@ use windows::Win32::System::Diagnostics::Etw::{
 
 pub unsafe fn trace_process(
     process_handle: OwnedHandle,
-    process_id,
+    process_id: u32,
     trace_name: String,
     samples_per_second: u32,
 ) {
     let provider = Provider::by_guid(PROFILE_PROVIDER.guid)
         .trace_flags(TraceFlags::EVENT_ENABLE_PROPERTY_STACK_TRACE)
-        .add_callback(EventRecord::process_id())
+        .add_callback(EventRecord::process_id(process_id))
         .build();
 
     let (mut trace, trace_handle) = KernelTrace::new()

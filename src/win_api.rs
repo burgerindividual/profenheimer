@@ -7,10 +7,11 @@ use windows::Win32::System::Threading::{OpenProcess, PROCESS_ALL_ACCESS};
 use windows::Win32::UI::WindowsAndMessaging::{
     EnumChildWindows, EnumWindows, GetWindowTextLengthW, GetWindowTextW, GetWindowThreadProcessId,
 };
+use windows::Win32::System::ProcessStatus::EnumProcessModules;
 
 static mut CURRENT_WINDOW_HANDLE: HWND = HWND(0);
 
-unsafe fn get_window_process_handle_pid(partial_window_title: &str) -> (OwnedHandle, u32) {
+pub unsafe fn get_window_process_handle_pid(partial_window_title: &str) -> (OwnedHandle, u32) {
     EnumWindows(
         Some(check_window_title_parents),
         LPARAM((&partial_window_title as *const &str).expose_addr() as isize),
@@ -81,6 +82,14 @@ unsafe fn check_window_title(
         }
         BOOL::from(true)
     }
+}
+
+pub unsafe fn load_process_module_pdbs(process_handle: HANDLE) {
+    
+
+    EnumProcessModules(
+        process_handle,
+    ).ok().expect("Unable to enumerate over process modules");
 }
 
 // CODE BELOW FROM CRATE "blondie", ty for making it MIT nico-abram

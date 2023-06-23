@@ -142,6 +142,8 @@ checksum = "bef38d45163c2f1dde094a7dfd33ccf595c92905c8f8f4fdc18d06fb1037718a"
 [[package]]
 name = "blondie"
 version = "0.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "05b8ee271efa6507b9b646dc0e8150f61bcb526a7f213b4e2b8ef1924393f075"
 dependencies = [
  "object",
  "pdb-addr2line",
