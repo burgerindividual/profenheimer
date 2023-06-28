@@ -5,8 +5,8 @@
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 //
-// 1. Redistributions of source code must retain the above copyright notice, this
-//    list of conditions and the following disclaimer.
+// 1. Redistributions of source code must retain the above copyright notice,
+// this    list of conditions and the following disclaimer.
 //
 // 2. Redistributions in binary form must reproduce the above copyright notice,
 //    this list of conditions and the following disclaimer in the documentation
@@ -27,13 +27,14 @@ use core::sync::atomic::AtomicBool;
 use std::pin::Pin;
 use std::sync::Arc;
 use std::time::Duration;
+
 use windows::Win32::System::Threading::{
     WaitOnAddress, WakeByAddressAll, WakeByAddressSingle, INFINITE,
 };
 
 pub trait AtomicWait {
     type CompareWith;
-    
+
     fn wait(&self, expected: Self::CompareWith);
     fn wait_timeout(&self, expected: Self::CompareWith, timeout: Duration);
     fn wake_one(&self);
