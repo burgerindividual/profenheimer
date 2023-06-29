@@ -38,8 +38,8 @@ pub unsafe fn get_window_process(partial_window_title: &str) -> Process {
     let process_handle = get_process_handle_from_pid(process_id);
 
     Process {
-        process_handle,
-        process_id,
+        handle: process_handle,
+        id: process_id,
     }
 }
 
@@ -125,33 +125,11 @@ pub unsafe fn register_wait_on_process_close(
 
 #[derive(Debug)]
 pub struct Process {
-    pub process_handle: OwnedHandle,
-    pub process_id: u32,
+    pub handle: OwnedHandle,
+    pub id: u32,
 }
 
-// CODE BELOW BASED OFF CRATE "blondie"
-//
-// MIT License
-//
-// Copyright (c) 2021 Nicolas Abram Lujan
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
+//// Code below based off crate "blondie" by nico-abram
 
 pub unsafe fn acquire_privileges() {
     let mut privs = TOKEN_PRIVILEGES {

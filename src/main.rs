@@ -7,8 +7,7 @@ mod process;
 mod trace;
 
 use std::fs::File;
-use std::io::Write;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::process::ExitCode;
 use std::time::Duration;
 
@@ -21,7 +20,7 @@ use crate::log::{err_verbose, log_verbose, VERBOSE_LOGGING};
 use crate::process::{
     acquire_privileges, get_process_handle_from_pid, get_window_process, Process,
 };
-// use crate::trace::{init_ctrl_c_handler, trace_process};
+use crate::trace::{init_ctrl_c_handler, trace};
 
 const BUFFER_DEFAULT_SIZE: usize = 50000000; // 50MB
 
@@ -118,8 +117,8 @@ fn main() {
         if let Some(&process_id) = input_process_id {
             let process_handle = get_process_handle_from_pid(process_id);
             Some(Process {
-                process_handle,
-                process_id,
+                handle: process_handle,
+                id: process_id,
             })
         } else {
             input_partial_window_title
@@ -147,50 +146,37 @@ fn main() {
         )
     };
 
-    println!(
-        "{:?}\n{:?}\n{:?}\n{:?}\n{:?}\n{:?}\n{:?}\n",
-        show_kernel_stacks,
-        include_offsets,
-        wait_time,
-        length_time,
-        samples_per_second,
-        process,
-        out_path
-    );
-
-    // init_ctrl_c_handler();
+    init_ctrl_c_handler();
 
     unsafe {
-        // let results = trace_process(
-        //     process,
-        //     wait_time,
-        //     length_time,
-        //     samples_per_second,
-        //     show_kernel_stacks,
-        // );
+        let results = trace(
+            process,
+            wait_time,
+            length_time,
+            samples_per_second,
+            show_kernel_stacks,
+        );
 
-        // let mut dtrace_stacks =
-        // Vec::<u8>::with_capacity(BUFFER_DEFAULT_SIZE); log_verbose!("
-        // Converting stacks to dtrace format..."); results
-        //     .write_dtrace(&mut dtrace_stacks)
-        //     .expect("Error writing dtrace stacks");
-        //
-        // let file = File::create(&out_path)
-        //     .unwrap_or_else(|_| panic!("Error creating output file {}",
-        // out_path.display()));
-        //
-        // log_verbose!(
-        //     "Folding dtrace stacks and saving to {}...",
-        //     out_path.display()
-        // );
-        // let mut inferno_options = Options::default();
-        // inferno_options.includeoffset = include_offsets;
-        // let mut folder = Folder::from(inferno_options);
-        //
-        // folder
-        //     .collapse(&dtrace_stacks[..], file)
-        //     .expect("Error folding dtrace stacks");
-        //
-        // log_verbose!("Finished folding");
+        let mut dtrace_stacks = Vec::<u8>::with_capacity(BUFFER_DEFAULT_SIZE);
+        results
+            .write_dtrace(&mut dtrace_stacks)
+            .expect("Error writing dtrace stacks");
+
+        let file = File::create(&out_path)
+            .unwrap_or_else(|_| panic!("Error creating output file {}", out_path.display()));
+
+        log_verbose!(
+            "Folding dtrace stacks and saving to {}...",
+            out_path.display()
+        );
+        let mut inferno_options = Options::default();
+        inferno_options.includeoffset = include_offsets;
+        let mut folder = Folder::from(inferno_options);
+
+        folder
+            .collapse(&dtrace_stacks[..], file)
+            .expect("Error folding dtrace stacks");
+
+        log_verbose!("Finished folding");
     }
 }
