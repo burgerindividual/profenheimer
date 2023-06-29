@@ -37,35 +37,42 @@ fn main() {
             arg!(
                 -t --title <STRING> "Partial window title to match processes to"
             )
-            .required(false),
+                .required_unless_present_any(["pid", "system"]),
         )
         .arg(
             arg!(
                 -p --pid <PID> "PID of the process to match to"
             )
-            .required(false)
-            .value_parser(value_parser!(u32)),
+                .required_unless_present_any(["system", "title"])
+                .value_parser(value_parser!(u32)),
+        )
+        .arg(
+            arg!(
+                --system "Do a full system profile (not recommended)"
+            )
+                .required_unless_present_any(["pid", "title"])
+                .action(ArgAction::SetTrue),
         )
         .arg(
             arg!(
                 --wait <SECONDS> "How long the trace should wait before starting (default: 0)"
             )
-            .required(false)
-            .value_parser(value_parser!(f64)),
+                .required(false)
+                .value_parser(value_parser!(f64)),
         )
         .arg(
             arg!(
                 -l --length <SECONDS> "How long the trace should last (default: until manually stopped)"
             )
-            .required(false)
-            .value_parser(value_parser!(f64)),
+                .required(false)
+                .value_parser(value_parser!(f64)),
         )
         .arg(
             arg!(
                 -s --sample_rate <SAMPLE_RATE> "The amount of samples that should be taken per second (default: 997)"
             )
-            .required(false)
-            .value_parser(value_parser!(u32)),
+                .required(false)
+                .value_parser(value_parser!(u32)),
         )
         .arg(
             arg!(
@@ -85,8 +92,8 @@ fn main() {
             arg!(
                 -q --quiet "Disable verbose logging"
             )
-            .required(false)
-            .action(ArgAction::SetTrue),
+                .required(false)
+                .action(ArgAction::SetTrue),
         )
         .get_matches();
 
