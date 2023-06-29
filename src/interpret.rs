@@ -250,7 +250,7 @@ impl<'a> StackTraceEntry<'a> {
 
             callback(CallstackSample {
                 address: sample_address,
-                displacement: sample_address - procedure_frames.start_rva as usize, // TODO: validate this
+                displacement: addr_in_module - procedure_frames.start_rva as usize,
                 symbol_names: &symbol_names,
                 image_name: Some(image_name),
             })?;
@@ -325,6 +325,16 @@ impl TraceResults {
                 }
                 Ok(())
             })?;
+
+            // add fake stack frame to include process and thread info
+            let pid = callstack.stack.process_id;
+            let tid = callstack.stack.thread_id;
+            let thread_name_or_empty = self
+                .thread_name_map
+                .get(&tid)
+                .filter(|name| !name.is_empty())
+                .map_or(String::new(), |name| format!(" ({})", name));
+            writeln!(w, "\t\tPID: {pid} TID: {tid}{thread_name_or_empty}")?;
 
             let count = callstack.sample_count;
             write!(w, "\t\t{count}\n\n")?;

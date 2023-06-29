@@ -61,7 +61,7 @@ pub unsafe fn trace(
     if !length_time.is_zero() {
         log_verbose!(
             "Profiling for {:.2} seconds... Press Ctrl+C to stop",
-            wait_time.as_secs_f64()
+            length_time.as_secs_f64()
         );
 
         trace.is_running.wait_timeout(true, length_time);
@@ -402,7 +402,7 @@ impl EtwTrace {
                             raw_str
                         })
                         .and_then(|raw_str| raw_str.to_string().ok())
-                        .unwrap_or_else(|| format!("Thread ID {}", thread_id))
+                        .unwrap_or_else(|| String::new())
                         .into_boxed_str()
                 });
 
