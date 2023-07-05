@@ -386,10 +386,8 @@ impl EtwTrace {
                     return;
                 }
 
-                // dear past me
-                // you are despicable for writing this
-                // you suck
                 let thread_entry = context.thread_name_map.entry(thread_id);
+                // TODO: use image names from Thread/Start and Thread/DCStart if widely supported
                 thread_entry.or_insert_with(|| {
                     OpenThread(THREAD_QUERY_LIMITED_INFORMATION, false, thread_id)
                         .ok()
@@ -401,8 +399,9 @@ impl EtwTrace {
                                 .expect("Error closing thread handle");
                             raw_str
                         })
-                        .and_then(|raw_str| raw_str.to_string().ok())
-                        .unwrap_or_else(|| String::new())
+                        .map_or(String::new(), |raw_str| {
+                            String::from_utf16_lossy(raw_str.as_wide())
+                        })
                         .into_boxed_str()
                 });
 

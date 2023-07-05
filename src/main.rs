@@ -1,4 +1,4 @@
-#![feature(new_uninit, strict_provenance, windows_handle, exitcode_exit_method)]
+#![feature(new_uninit, strict_provenance, exitcode_exit_method, let_chains)]
 
 mod atomic_wait;
 mod interpret;
@@ -83,7 +83,7 @@ fn main() {
         )
         .arg(
             arg!(
-                -n --no_offsets "Disable function offsets in output"
+                -n --no_offsets "Disable function offsets in output (causes some frames to merge)"
             )
                 .required(false)
                 .action(ArgAction::SetTrue),
@@ -91,6 +91,13 @@ fn main() {
         .arg(
             arg!(
                 -q --quiet "Disable verbose logging"
+            )
+                .required(false)
+                .action(ArgAction::SetTrue),
+        )
+        .arg(
+            arg!(
+                -f --file_names "Use source file names instead of binary image names when possible."
             )
                 .required(false)
                 .action(ArgAction::SetTrue),
@@ -105,6 +112,7 @@ fn main() {
     }
 
     let show_kernel_stacks = matches.get_flag("kernel");
+    let use_source_paths = matches.get_flag("file_names");
     let include_offsets = !matches.get_flag("no_offsets");
 
     let input_partial_window_title = matches.get_one::<String>("title");
@@ -164,9 +172,9 @@ fn main() {
             show_kernel_stacks,
         );
 
-        let mut dtrace_stacks = Vec::<u8>::with_capacity(BUFFER_DEFAULT_SIZE);
+        let mut dtrace_buffer = Vec::<u8>::with_capacity(BUFFER_DEFAULT_SIZE);
         results
-            .write_dtrace(&mut dtrace_stacks)
+            .write_dtrace(&mut dtrace_buffer, use_source_paths)
             .expect("Error writing dtrace stacks");
 
         let file = File::create(&out_path)
@@ -181,7 +189,7 @@ fn main() {
         let mut folder = Folder::from(inferno_options);
 
         folder
-            .collapse(&dtrace_stacks[..], file)
+            .collapse(&dtrace_buffer[..], file)
             .expect("Error folding dtrace stacks");
 
         log_verbose!("Finished folding");
